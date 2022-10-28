@@ -13,96 +13,99 @@ import time
  
 class ResizableWindow:
     def __init__(self, parent):
+        # root = parent 
         self.parent = parent
-        self.f1_style = ttk.Style()
 
-        self.f1_style.configure('My.TFrame', background='#334353')
+        #creating menu_bar for top 
+        self.menubar = Menu(self.parent )  
 
-        self.f1 = ttk.Frame(self.parent, style='My.TFrame' )  # added padding
-        # main_video is for main video
-        self.main_video = ttk.Frame(self.f1 )
+        self.file = Menu(self.menubar, tearoff=0)  
+        self.file.add_command(label="New")  
+        self.file.add_command(label="Open")  
+        self.file.add_command(label="Save")  
+        self.file.add_command(label="Save as...")  
+        self.file.add_command(label="Close")  
+        self.file.add_separator()  
+        self.file.add_command(label="Exit", command=self.parent )  
+        self.menubar.add_cascade(label="File", menu=self.file)  
 
+        self.edit = Menu(self.menubar, tearoff=0)  
+        self.edit.add_command(label="Undo")  
+        self.edit.add_separator()  
+        self.edit.add_command(label="Cut")  
+        self.edit.add_command(label="Copy")  
+        self.edit.add_command(label="Paste")  
+        self.edit.add_command(label="Delete")  
+        self.edit.add_command(label="Select All")  
+        self.menubar.add_cascade(label="Edit", menu=self.edit)  
 
+        help = Menu(self.menubar, tearoff=0)  
+        help.add_command(label="About")  
+        self.menubar.add_cascade(label="Help", menu=help)  
+        self.parent.config(menu=self.menubar)  
 
+        #main window 
+        self.main_window_style = ttk.Style()
+        self.main_window_style.configure('My.TFrame', background='#334353')
+        self.main_window = ttk.Frame(self.parent, style='My.TFrame' )  # added padding
 
-        self.bottom_frames = ttk.Frame(self.f1 )
-
-        self.bottom_video_list = ttk.Frame(self.bottom_frames, style='My.TFrame' )
-
-
-        self.tabControl0 = ttk.Notebook(self.f1)
-        self.tab10 = ttk.Frame(self.tabControl0)
-        self.tab20 = ttk.Frame(self.tabControl0)
-        
-        self.tabControl0.add(self.tab10, text ='Tab 1')
-        self.tabControl0.add(self.tab20, text ='Tab 2')
-        # self.tabControl.pack(expand = 1, fill ="both")
-
-        ttk.Label(self.tab10, text ="Welcome to \GeeksForGeeks").grid(column = 0,row = 0,padx = 30,pady = 30)  
-        ttk.Label(self.tab20,
-                text ="Lets dive into the\world of computers").grid(column = 0,row = 0, padx = 30,pady = 30)
-
-
-
-
-        self.tabControl = ttk.Notebook(self.f1)
-        self.tab1 = ttk.Frame(self.tabControl)
-        self.tab2 = ttk.Frame(self.tabControl)
-        
-        self.tabControl.add(self.tab1, text ='Tab 1')
-        self.tabControl.add(self.tab2, text ='Tab 2')
-        # self.tabControl.pack(expand = 1, fill ="both")
-
-        ttk.Label(self.tab1, text ="Welcome to GeeksForGeeks").grid(column = 0,row = 0,padx = 30,pady = 30)  
-        ttk.Label(self.tab2,text ="Lets dive into theworld of computers").grid(column = 0,row = 0, padx = 30,pady = 30)
-
-
-        self.tabControl2 = ttk.Notebook(self.bottom_video_list)
-        self.tab12 = ttk.Frame(self.tabControl2)
-        self.tab22 = ttk.Frame(self.tabControl2)
-        
-        self.tabControl2.add(self.tab12, text ='Live View')
-        self.tabControl2.add(self.tab22, text ='Preview')
-
+        #root or parent weight for column
         self.parent.columnconfigure(0, weight=1)
         self.parent.rowconfigure(0, weight=1)
-        self.f1.columnconfigure(0, weight=3)
-        self.f1.columnconfigure(1, weight=3)
-        self.f1.columnconfigure(2, weight=3)
-        self.f1.columnconfigure(3, weight=4)
-
-        # self.f1.rowconfigure(1, weight=3)
-        self.f1.rowconfigure(1, weight=3)
-        self.f1.rowconfigure(2, weight=3)
-        self.f1.rowconfigure(3, weight=5)
-
-        self.bottom_frames.columnconfigure(1, weight=3)
-        self.bottom_frames.columnconfigure(2, weight=3)
-        self.bottom_frames.columnconfigure(3, weight=3)
-        self.bottom_frames.columnconfigure(4, weight=3)
-        self.bottom_frames.rowconfigure(0, weight=1)
-
-
         
-        self.main_video.columnconfigure(0, weight=1)
-        self.main_video.rowconfigure(0, weight=1)
-        self.bottom_frames.columnconfigure(0, weight=1)
-        self.bottom_frames.rowconfigure(0, weight=1)
-        self.bottom_video_list.columnconfigure(0, weight=1)
-        self.bottom_video_list.rowconfigure(0, weight=1)
-        # self.tab12.columnconfigure(0, weight=1)
-        # self.tab12.rowconfigure(0, weight=1)
-        self.f1.grid(column=0 , row=0, sticky=(N, S, E, W))  # added sticky
-        self.main_video.grid(column=0,row=0, columnspan=3, rowspan=3, sticky=(N, S, E, W))  # added sticky
+        #main_window weight for column (0,1,2) cols for main video (3) for right tab boxes 
+        self.main_window.columnconfigure(0, weight=3)
+        self.main_window.columnconfigure(1, weight=3)
+        self.main_window.columnconfigure(2, weight=3)
+        self.main_window.columnconfigure(3, weight=4)
 
-        self.bottom_frames.grid(column=0,row=3, columnspan=5, rowspan=1, sticky=(N, S, E, W))  # Bottom
+        #main_window weight for rows (1) col for bottom row 
+        self.main_window.rowconfigure(1, weight=2)
 
-        self.bottom_video_list.grid(column=0,row=0, columnspan=5, rowspan=1, sticky=(N, S, E, W))  # Bottom
-        self.tabControl0.grid(column=3, row=1, columnspan=2, sticky=(N, E, W, S), padx=5,pady=5)  # added sticky, padx
-        self.tabControl.grid(column=3, row=0, columnspan=2, sticky=(N, E, W), padx=5,pady=5)  # added sticky, padx
-        self.tabControl2.grid(column=0, row=0, columnspan=4, sticky=(N, E, W, S), padx=5,pady=5)  # added sticky, padx
+        # main_video frame for main video
+        self.main_video = ttk.Frame(self.main_window )
 
-       
+        # display other cameras images in given child tab 
+        self.bottom_frames = ttk.Frame(self.main_window )
+
+        # bottom_video_list is a child of bottom_frames
+        self.bottom_video_list = ttk.Frame(self.bottom_frames)
+
+        # right box 1 
+        self.right_box_1 = ttk.Notebook(self.main_window)
+        self.right_box_tab_1 = ttk.Frame(self.right_box_1)
+        self.right_box_tab_2 = ttk.Frame(self.right_box_1)
+        self.right_box_1.add(self.right_box_tab_1, text ='Tab 1')
+        self.right_box_1.add(self.right_box_tab_2, text ='Tab 2')
+
+        ttk.Label(self.right_box_tab_1, text ="right_box_1").grid(column = 0,row = 0,padx = 30,pady = 30)  
+        ttk.Label(self.right_box_tab_2, text ="Lets dive into the\world of computers").grid(column = 0,row = 0, padx = 30,pady = 30)
+        self.right_box_1.grid(column=3, row=0, columnspan=2, sticky=(N, E, W, S), padx=5,pady=5)  
+
+
+        # right box 1    
+        self.right_box_2 = ttk.Notebook(self.main_window)
+        self.right_box_2_tab_1 = ttk.Frame(self.right_box_2)
+        self.right_box_2_tab_2 = ttk.Frame(self.right_box_2)
+        self.right_box_2.add(self.right_box_2_tab_1, text ='Tab 1')
+        self.right_box_2.add(self.right_box_2_tab_2, text ='Tab 2')
+
+        ttk.Label(self.right_box_2_tab_1, text ="right_box 2").grid(column = 0,row = 0,padx = 30,pady = 30)  
+        ttk.Label(self.right_box_2_tab_2,text ="Lets dive into theworld of computers").grid(column = 0,row = 0, padx = 30,pady = 30)
+        self.right_box_2.grid(column=3, row=1, columnspan=2, sticky=(N, E, W), padx=5,pady=5)  # added sticky, padx
+
+
+        # Video box 1  
+        self.bottom_tab_box = ttk.Notebook(self.bottom_video_list)
+        self.bottom_tab_1 = ttk.Frame(self.bottom_tab_box)
+        self.bottom_tab_2 = ttk.Frame(self.bottom_tab_box)
+        self.bottom_tab_box.add(self.bottom_tab_1, text ='Live View')
+        self.bottom_tab_box.add(self.bottom_tab_2, text ='Preview')
+        
+        self.bottom_tab_box.grid(column=0, row=0, columnspan=4, sticky=(N, E, W, S), padx=5,pady=5)  # added sticky, padx
+
+
+
 
         self.img = ImageTk.PhotoImage(Image.open("2.jpg"))
         self.canvas= Canvas( self.main_video)
@@ -110,106 +113,59 @@ class ResizableWindow:
         self.canvas.grid(column=0 ,row =0 ,sticky="NSEW")
 
 
-        # button1=ttk.Button( self.tab12, text="button1")
-        # button1.grid(pady = 2,row=0,column=0)
-
-        # button2=ttk.Button( self.tab12, text="button2")
-        # button2.grid(pady = 2,row=0,column=1)
-
-        # button3=ttk.Button( self.tab12, text="button3")
-        # button3.grid(pady = 2,row=0,column=2)
-
-        # button4=ttk.Button( self.tab12, text="button4")
-        # button4.grid(pady = 2,row=0,column=3)
-
-        # button5=ttk.Button( self.tab12, text="button5")
-        # button5.grid(pady = 2,row=0,column=4)
-
-        # button6=ttk.Button( self.tab12, text="button1")
-        # button6.grid(pady = 2,row=1,column=0)
-
-        # button7=ttk.Button( self.tab12, text="button2")
-        # button7.grid(pady = 2,row=1,column=1)
-
-        # button8=ttk.Button( self.tab12, text="button3")
-        # button8.grid(pady = 2,row=1,column=2)
-
-        # button9=ttk.Button( self.tab12, text="button4")
-        # button9.grid(pady = 2,row=1,column=3)
-
-        # button10=ttk.Button( self.tab12, text="button5")
-        # button10.grid(pady = 2,row=1,column=4)
 
         self.img1 = ImageTk.PhotoImage(Image.open("3.jpg"))
-        self.canvas1= Canvas( self.tab12)
+        self.canvas1= Canvas( self.bottom_tab_1)
         self.canvas1.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas1.grid(column=0 ,row =0 ,sticky="NW", columnspan=1)
 
 
         
         self.img2 = ImageTk.PhotoImage(Image.open("1.jpg"))
-        self.canvas2= Canvas( self.tab12)
+        self.canvas2= Canvas( self.bottom_tab_1)
         self.canvas2.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas2.grid(column=1 ,row =0 ,sticky="NW")
 
         
         self.img3 = ImageTk.PhotoImage(Image.open("3.jpg"))
-        self.canvas3= Canvas( self.tab12)
+        self.canvas3= Canvas( self.bottom_tab_1)
         self.canvas3.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas3.grid(column=2 ,row =0 ,sticky="NW", columnspan=1)
 
         self.img4 = ImageTk.PhotoImage(Image.open("3.jpg"))
-        self.canvas4= Canvas( self.tab12)
+        self.canvas4= Canvas( self.bottom_tab_1)
         self.canvas4.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas4.grid(column=3 ,row =0 ,sticky="NW", columnspan=1)
 
         self.img5 = ImageTk.PhotoImage(Image.open("2.jpg"))
-        self.canvas5= Canvas( self.tab12)
+        self.canvas5= Canvas( self.bottom_tab_1)
         self.canvas5.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas5.grid(column=4 ,row =0 ,sticky="NSEW", columnspan=1)
 
         self.img6 = ImageTk.PhotoImage(Image.open("1.jpg"))
-        self.canvas6= Canvas( self.tab12)
+        self.canvas6= Canvas( self.bottom_tab_1)
         self.canvas6.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas6.grid(column=5 ,row =0 ,sticky="NSEW", columnspan=1)
-        self.img6 = Image.open("1.jpg")
-        self.resized_img6 = self.img6.resize((100,100),Image.ANTIALIAS)
-        self.new_bg6 = ImageTk.PhotoImage(self.resized_img6 )
-        # # self.canvas6.create_image(0.5,0.5,anchor=NW,image=self.new_bg6)
-        # button1=ttk.Button( self.tab12,image = self.new_bg6, text="button1")
-        # button1.grid(pady = 2,row=0,column=0)
-
-        # button2=ttk.Button( self.tab12,image = self.new_bg6, text="button2")
-        # button2.grid(pady = 2,row=0,column=1)
-
-        # button3=ttk.Button( self.tab12,image = self.new_bg6, text="button3")
-        # button3.grid(pady = 2,row=0,column=2)
-
-        # button4=ttk.Button( self.tab12,image = self.new_bg6, text="button4")
-        # button4.grid(pady = 2,row=0,column=3)
-
-        # button5=ttk.Button( self.tab12,image = self.new_bg6, text="button5")
-        # button5.grid(pady = 2,row=0,column=4)
-
-        # button6=ttk.Button( self.tab12,image = self.new_bg6, text="button1")
-        # button6.grid(pady = 2,row=1,column=0)
-
-        # button7=ttk.Button( self.tab12,image = self.new_bg6, text="button2")
-        # button7.grid(pady = 2,row=1,column=1)
-
-        # button8=ttk.Button( self.tab12,image = self.new_bg6, text="button3")
-        # button8.grid(pady = 2,row=1,column=2)
-
-        # button9=ttk.Button( self.tab12,image = self.new_bg6, text="button4")
-        # button9.grid(pady = 2,row=1,column=3)
-
-        # button10=ttk.Button( self.tab12,image = self.new_bg6, text="button5")
-        # button10.grid(pady = 2,row=1,column=4)
 
 
+        
+        self.main_video.columnconfigure(0, weight=1)
+        self.main_video.rowconfigure(0, weight=1)
 
-        self.scrollbar = Scrollbar( self.tab12, orient='horizontal')
-        self.scrollbar.config()
+        self.bottom_video_list.columnconfigure(0, weight=1)
+        self.bottom_video_list.rowconfigure(0, weight=1)
+
+        self.main_window.grid(column=0 , row=0, sticky=(N, S, E, W))  # added sticky
+        self.main_video.grid(column=0,row=0, columnspan=3, rowspan=3, sticky=(N, S, E, W))  # added sticky
+
+        self.bottom_frames.grid(column=0,row=3, columnspan=5, rowspan=1, sticky=(N, S, E, W))  # Bottom
+
+        self.bottom_video_list.grid(column=0,row=0, columnspan=5, rowspan=1, sticky=(N, S, E, W))  # Bottom
+        
+
+       
+
+
 
 
     def resizeApp(self,e):
@@ -219,8 +175,8 @@ class ResizableWindow:
         self.resized_img = self.img.resize((self.main_video.winfo_width(),self.main_video.winfo_height()),Image.ANTIALIAS)
         self.new_bg = ImageTk.PhotoImage(self.resized_img )
         self.canvas.create_image(0.5,0.5,anchor=NW,image=self.new_bg)
-        # print("tab12",self.tab12.winfo_width())
-        self.sample_width = int(( self.tab12.winfo_width()/4)/2)
+        # print("bottom_tab_1",self.bottom_tab_1.winfo_width())
+        self.sample_width = int(( self.bottom_tab_1.winfo_width()/4)/2)
         self.img1 = Image.open("2.jpg")
         self.resized_img1 = self.img1.resize((self.sample_width,self.sample_width),Image.ANTIALIAS)
         self.new_bg1 = ImageTk.PhotoImage(self.resized_img1 )
