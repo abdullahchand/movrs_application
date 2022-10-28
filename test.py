@@ -20,17 +20,7 @@ class ResizableWindow:
 
         self.f1 = ttk.Frame(self.parent, style='My.TFrame')  # added padding
 
-        self.f2 = ttk.Frame(self.f1 ,  width= 600, height= 400)
-
-
-        # Create an object of tkinter ImageTk
-        self.img = ImageTk.PhotoImage(Image.open("1.jpg"))
-        self.canvas= Canvas( self.f2)
-        # Create a Label Widget to display the text or Image
-
-        # right tab 
-        # self.namelbl = ttk.Label(self.f1, text="Name")
-        # self.name = ttk.Entry(self.f1)
+        self.f2 = ttk.Frame(self.f1 )
         self.tabControl = ttk.Notebook(self.f1)
         self.tab1 = ttk.Frame(self.tabControl)
         self.tab2 = ttk.Frame(self.tabControl)
@@ -69,14 +59,20 @@ class ResizableWindow:
         # self.three = ttk.Checkbutton(self.f1, text="Three",  onvalue=True)
         # self.ok = ttk.Button(self.f1, text="Okay")
         # self.cancel = ttk.Button(self.f1, text="Cancel")
-        self.width = self.canvas.winfo_width()
-        print("This is me  : " ,self.width , self.canvas.winfo_height())
+
         self.f1.grid(column=0 , row=0, sticky=(N, S, E, W))  # added sticky
         self.f2.grid(column=0,row=0, columnspan=3, rowspan=2, sticky=(N, S, E, W))  # added sticky
-        self.tabControl.grid(column=3, row=0, columnspan=2, sticky=(N, E, W), padx=5)  # added sticky, padx
+
+
+        self.tabControl.grid(column=3, row=0, columnspan=2, sticky=(N, E, W), padx=5,pady=5)  # added sticky, padx
         # self.label.grid(column=0 ,row =0 ,sticky="NSEW")
+        # Create an object of tkinter ImageTk
+        self.img = ImageTk.PhotoImage(Image.open("1.jpg"))
+        self.canvas= Canvas( self.f2)
+        self.width = self.canvas.winfo_width()
 
         self.canvas.create_image(0.5,0.5,anchor=NW,image=self.img)
+
         self.canvas.grid(column=0 ,row =0 ,sticky="NSEW")
         # self.name.grid(column=3, row=1, columnspan=2, sticky=(N, E, W), pady=5, padx=5)  # added sticky, pady, padx
         # self.one.grid(column=0, row=3)
@@ -95,9 +91,7 @@ class ResizableWindow:
         self.new_bg = ImageTk.PhotoImage(self.resized_img )
         self.canvas.create_image(0.5,0.5,anchor=NW,image=self.new_bg)
 
-        end = time.time()
-        print("end ",end-start)
-# def resizeApp(e):
+
 #     print("perinting n new ",e.width )
 
 
@@ -105,8 +99,13 @@ class ResizableWindow:
 def main():
     root = Tk()
     rw = ResizableWindow(root)
+    # root.wm_state('zoomed')
     root.attributes('-zoomed', True)
+
     root.bind('<Configure>',rw.resizeApp)
+
+
+
     root.mainloop()
  
  
