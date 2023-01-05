@@ -1,47 +1,34 @@
-#
-# Laying out a tkinter grid
-#
-# Please also find two images:
-#    GridLayout.png and screenshot.png
-# Credit: Modified by Larz60+ From the original:
-#    'http://www.tkdocs.com/tutorial/grid.html'
-#    
 from tkinter import *
 from tkinter import ttk
 from PIL import ImageTk, Image
 import time
- 
+import os, sys, subprocess
+from charts import ChartWindow
+import subprocess   
+from play_videos import StreamVideos
+from multiprocessing import Process, Queue
+import threading
+import cv2
+from tkinter import messagebox
+
+
 class ResizableWindow:
     def __init__(self, parent):
         # root = parent 
         self.parent = parent
 
+        self.number_of_cameras = 8
+        self.sample_cams_width = 100
+        self.buttons =[]
+        #initialize object for graph class
+        self.obj = StreamVideos()
+        self.parent.title("Movrs Application")
         #creating menu_bar for top 
         self.menubar = Menu(self.parent )  
-
         self.file = Menu(self.menubar, tearoff=0)  
-        self.file.add_command(label="New")  
-        self.file.add_command(label="Open")  
-        self.file.add_command(label="Save")  
-        self.file.add_command(label="Save as...")  
-        self.file.add_command(label="Close")  
-        self.file.add_separator()  
-        self.file.add_command(label="Exit", command=self.parent )  
-        self.menubar.add_cascade(label="File", menu=self.file)  
-
-        self.edit = Menu(self.menubar, tearoff=0)  
-        self.edit.add_command(label="Undo")  
-        self.edit.add_separator()  
-        self.edit.add_command(label="Cut")  
-        self.edit.add_command(label="Copy")  
-        self.edit.add_command(label="Paste")  
-        self.edit.add_command(label="Delete")  
-        self.edit.add_command(label="Select All")  
-        self.menubar.add_cascade(label="Edit", menu=self.edit)  
-
-        help = Menu(self.menubar, tearoff=0)  
-        help.add_command(label="About")  
-        self.menubar.add_cascade(label="Help", menu=help)  
+ 
+        self.menubar.add_cascade(label="Charts",command = self.openCharts)  
+        self.menubar.add_cascade(label="BVH",command = self.openBVH)  
         self.parent.config(menu=self.menubar)  
 
         #main window 
@@ -104,53 +91,27 @@ class ResizableWindow:
         
         self.bottom_tab_box.grid(column=0, row=0, columnspan=4, sticky=(N, E, W, S), padx=5,pady=5)  # added sticky, padx
 
-
-
-
-        self.img = ImageTk.PhotoImage(Image.open("2.jpg"))
+        self.img = ImageTk.PhotoImage(Image.open("images/black.jpg"))
         self.canvas= Canvas( self.main_video)
         self.canvas.create_image(0.5,0.5,anchor=NW,image=self.img)
         self.canvas.grid(column=0 ,row =0 ,sticky="NSEW")
+        self.button_col=0
+        self.img2 = Image.open("images/black.jpg")
+        self.resized_img2 = self.img2.resize((100,100))
+        self.new_bg2 = ImageTk.PhotoImage(self.resized_img2 )
 
+        for x in range(0, self.number_of_cameras):
+            self.buttons.append(Button(self.bottom_tab_1,bg='white', text='button',image = self.new_bg2))
+            self.buttons[x].grid(pady = 2,row=0,column=self.button_col)
+            self.total_buttons = x
+            self.button_col += 1
+ 
 
-
-        self.img1 = ImageTk.PhotoImage(Image.open("3.jpg"))
-        self.canvas1= Canvas( self.bottom_tab_1)
-        self.canvas1.create_image(0.5,0.5,anchor=NW,image=self.img)
-        self.canvas1.grid(column=0 ,row =0 ,sticky="NW", columnspan=1)
-
-
-        
-        self.img2 = ImageTk.PhotoImage(Image.open("1.jpg"))
-        self.canvas2= Canvas( self.bottom_tab_1)
-        self.canvas2.create_image(0.5,0.5,anchor=NW,image=self.img)
-        self.canvas2.grid(column=1 ,row =0 ,sticky="NW")
-
-        
-        self.img3 = ImageTk.PhotoImage(Image.open("3.jpg"))
-        self.canvas3= Canvas( self.bottom_tab_1)
-        self.canvas3.create_image(0.5,0.5,anchor=NW,image=self.img)
-        self.canvas3.grid(column=2 ,row =0 ,sticky="NW", columnspan=1)
-
-        self.img4 = ImageTk.PhotoImage(Image.open("3.jpg"))
-        self.canvas4= Canvas( self.bottom_tab_1)
-        self.canvas4.create_image(0.5,0.5,anchor=NW,image=self.img)
-        self.canvas4.grid(column=3 ,row =0 ,sticky="NW", columnspan=1)
-
-        self.img5 = ImageTk.PhotoImage(Image.open("2.jpg"))
-        self.canvas5= Canvas( self.bottom_tab_1)
-        self.canvas5.create_image(0.5,0.5,anchor=NW,image=self.img)
-        self.canvas5.grid(column=4 ,row =0 ,sticky="NSEW", columnspan=1)
-
-        self.img6 = ImageTk.PhotoImage(Image.open("1.jpg"))
-        self.canvas6= Canvas( self.bottom_tab_1)
-        self.canvas6.create_image(0.5,0.5,anchor=NW,image=self.img)
-        self.canvas6.grid(column=5 ,row =0 ,sticky="NSEW", columnspan=1)
-
-
-        
+        # setup row and cols for all frames 
         self.main_video.columnconfigure(0, weight=1)
         self.main_video.rowconfigure(0, weight=1)
+
+        self.bottom_tab_1.rowconfigure(0, weight=1)
 
         self.bottom_video_list.columnconfigure(0, weight=1)
         self.bottom_video_list.rowconfigure(0, weight=1)
@@ -162,69 +123,91 @@ class ResizableWindow:
 
         self.bottom_video_list.grid(column=0,row=0, columnspan=5, rowspan=1, sticky=(N, S, E, W))  # Bottom
         
+        self.bottom_frames.columnconfigure(1, weight=3)
+        self.bottom_frames.columnconfigure(2, weight=3)
+        self.bottom_frames.columnconfigure(3, weight=3)
+        self.bottom_frames.columnconfigure(4, weight=3)
 
-       
+        self.start_process()
 
+    # function that charts /graphs bvh file
+    def openCharts(self):
+        self.top= Toplevel(self.parent)
+        self.top.geometry("750x250")
+        self.top.title("Charts")
+        cw = ChartWindow(self.top)
 
+    # function that open bvh file
+    def openBVH(self):
+        subprocess.Popen('python bvh.py', shell=True)
 
-
+    # function for resize app widgets
     def resizeApp(self,e):
-
         start = time.time()
-        self.img = Image.open("1.jpg")
-        self.resized_img = self.img.resize((self.main_video.winfo_width(),self.main_video.winfo_height()),Image.ANTIALIAS)
+        self.img = Image.open("images/black.jpg")
+        self.resized_img = self.img.resize((self.main_video.winfo_width(),self.main_video.winfo_height()))
         self.new_bg = ImageTk.PhotoImage(self.resized_img )
         self.canvas.create_image(0.5,0.5,anchor=NW,image=self.new_bg)
-        # print("bottom_tab_1",self.bottom_tab_1.winfo_width())
-        self.sample_width = int(( self.bottom_tab_1.winfo_width()/4)/2)
-        self.img1 = Image.open("2.jpg")
-        self.resized_img1 = self.img1.resize((self.sample_width,self.sample_width),Image.ANTIALIAS)
-        self.new_bg1 = ImageTk.PhotoImage(self.resized_img1 )
-        self.canvas1.create_image(0.5,0.5,anchor=NW,image=self.new_bg1)
-
-        self.img2 = Image.open("3.jpg")
-        self.resized_img2 = self.img2.resize((self.sample_width,self.sample_width),Image.ANTIALIAS)
-        self.new_bg2 = ImageTk.PhotoImage(self.resized_img2 )
-        self.canvas2.create_image(0.5,0.5,anchor=NW,image=self.new_bg2)
-
-        self.img3 = Image.open("1.jpg")
-        self.resized_img3 = self.img3.resize((self.sample_width,self.sample_width),Image.ANTIALIAS)
-        self.new_bg3 = ImageTk.PhotoImage(self.resized_img3 )
-        self.canvas3.create_image(0.5,0.5,anchor=NW,image=self.new_bg3)
-
-        self.img4 = Image.open("1.jpg")
-        self.resized_img4 = self.img4.resize((self.sample_width,self.sample_width),Image.ANTIALIAS)
-        self.new_bg4 = ImageTk.PhotoImage(self.resized_img4 )
-        self.canvas4.create_image(0.5,0.5,anchor=NW,image=self.new_bg4)
-
-        self.img5 = Image.open("1.jpg")
-        self.resized_img5 = self.img5.resize((self.sample_width,self.sample_width),Image.ANTIALIAS)
-        self.new_bg5 = ImageTk.PhotoImage(self.resized_img5 )
-        self.canvas5.create_image(0.5,0.5,anchor=NW,image=self.new_bg5)
 
 
+    def start_process(self):
+        # calling StreamVideos function start_process()
+        self.obj.start_proces()
+
+        # create a thread and run video stream on it 
+        t2 = threading.Thread(target=self.stream_videos)
+        t2.start()
+        
 
 
+    def stream_videos(self):
+        while True:
+            self.img = self.obj.image_data.get()
+            blue,green,red = cv2.split(self.img)
+            img = cv2.merge((red,green,blue))
+            im = Image.fromarray(img)
+            # resize the pictures to fit in dynamically
+            self.resized_img = im.resize((self.main_video.winfo_width(),self.main_video.winfo_height()))
+            if((self.parent.winfo_width()/8) < 107):
+                self.sample_cams_width = int((self.parent.winfo_width()/8)- 6)
+            else:
+                self.sample_cams_width = 100
+            self.resized_img2 = im.resize((self.sample_cams_width,self.sample_cams_width))
 
+            self.new_bg = ImageTk.PhotoImage(image=self.resized_img)
+            self.canvas.create_image(0.5,0.5,anchor=NW,image=self.new_bg)
+            self.new_bg2 = ImageTk.PhotoImage(self.resized_img2 )
+            # 8 camera buttons 
+            self.buttons[0]['image'] = self.new_bg2
+            self.buttons[1]['image'] = self.new_bg2
+            self.buttons[2]['image'] = self.new_bg2
+            self.buttons[3]['image'] = self.new_bg2
+            self.buttons[4]['image'] = self.new_bg2
+            self.buttons[5]['image'] = self.new_bg2
+            self.buttons[6]['image'] = self.new_bg2
+            self.buttons[7]['image'] = self.new_bg2
 
-        # for x in range(6):
-        #     print(x)
+    # on close text
+    def on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.parent.destroy()
 
-        # end = time.time()
-        # print("end ",end-start)
-
+       
 
 
 
 def main():
     root = Tk()
     rw = ResizableWindow(root)
+
+    # open in full windoww for linux and windows
     # root.wm_state('zoomed')
-    root.attributes('-zoomed', True)
+    # root.attributes('-zoomed', True)
 
     root.bind('<Configure>',rw.resizeApp)
 
 
+    root.protocol("WM_DELETE_WINDOW", rw.on_closing) 
 
     root.mainloop()
  
